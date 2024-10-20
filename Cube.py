@@ -103,9 +103,9 @@ class Cube:
         self.rotate_face_clockwise("Front")
         temp = [self.face["Top"][2][i] for i in range(3)]
         for i in range(3):
-            self.face["Top"][2][i] = self.face["Left"][2 - i][2]
+            self.face["Top"][2][i] = self.face["Left"][i][2]
             self.face["Left"][i][2] = self.face["Bottom"][0][i]
-            self.face["Bottom"][0][i] = self.face["Right"][2 - i][0]
+            self.face["Bottom"][0][i] = self.face["Right"][i][0]
             self.face["Right"][i][0] = temp[i]
 
     def rotate_back_clockwise(self):
@@ -113,13 +113,28 @@ class Cube:
         temp = [self.face["Top"][0][i] for i in range(3)]
         for i in range(3):
             self.face["Top"][0][i] = self.face["Right"][i][2]
-            self.face["Right"][i][2] = self.face["Bottom"][2 - i][i]
+            self.face["Right"][i][2] = self.face["Bottom"][2][i]
             self.face["Bottom"][2][i] = self.face["Left"][i][0]
-            self.face["Left"][i][0] = temp[2 - i]
+            self.face["Left"][i][0] = temp[i]
 
+    def print_cube(self, face):
+        content = f"---| {face}|---\n"
+        for row in self.face[face]:
+            content += f"\n|{row[0]} | {row[1]} | {row[2]} |\n"
+        return content
 
 kocka = Cube()
-#print(kocka.face) probavanje
-#kocka.rotate_top_clockwise()
-#print(kocka.face)
+kocka.rotate_top_clockwise()       #slike 1-1 i 1-2
+kocka.rotate_bottom_clockwise()    #slike 2-1 i 2-2
+kocka.rotate_left_clockwise()      #slike 3-1 i 3-2
+kocka.rotate_right_clockwise()     #slike 4-1 i 4-2
+kocka.rotate_front_clockwise()     #slike 5-1 i 5-2
+kocka.rotate_back_clockwise()      #slike 6-1 i 6-2
+print(kocka.print_cube("Top"))
+print(kocka.print_cube("Front"))
+print(kocka.print_cube("Left"))
+print(kocka.print_cube("Right"))
+print(kocka.print_cube("Back"))
+print(kocka.print_cube("Bottom"))
+
 
