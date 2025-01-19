@@ -1,39 +1,41 @@
 import random
+
 import numpy as np
 import cv2 as cv
+import twophase.solver as sv
 
 class Cube:
     def __init__(self):
         self.face = {
             "Top": [
-                ["⬜", "⬜", "⬜"],
-                ["⬜", "⬜", "⬜"],
-                ["⬜", "⬜", "⬜"]
-            ],
-            "Bottom": [
-                ["🟨", "🟨", "🟨"],
-                ["🟨", "🟨", "🟨"],
-                ["🟨", "🟨", "🟨"]
-            ],
-            "Left": [
-                ["🟩", "🟩", "🟩"],
-                ["🟩", "🟩", "🟩"],
-                ["🟩", "🟩", "🟩"]
-            ],
-            "Right": [
                 ["🟦", "🟦", "🟦"],
                 ["🟦", "🟦", "🟦"],
                 ["🟦", "🟦", "🟦"]
             ],
-            "Front": [
+            "Bottom": [
+                ["🟩", "🟩", "🟩"],
+                ["🟩", "🟩", "🟩"],
+                ["🟩", "🟩", "🟩"]
+            ],
+            "Left": [
+                ["🟧", "🟧", "🟧"],
+                ["🟧", "🟧", "🟧"],
+                ["🟧", "🟧", "🟧"]
+            ],
+            "Right": [
                 ["🟥", "🟥", "🟥"],
                 ["🟥", "🟥", "🟥"],
                 ["🟥", "🟥", "🟥"]
             ],
+            "Front": [
+                ["🟨", "🟨", "🟨"],
+                ["🟨", "🟨", "🟨"],
+                ["🟨", "🟨", "🟨"]
+            ],
             "Back": [
-                ["🟧", "🟧", "🟧"],
-                ["🟧", "🟧", "🟧"],
-                ["🟧", "🟧", "🟧"]
+                ["⬜", "⬜", "⬜"],
+                ["⬜", "⬜", "⬜"],
+                ["⬜", "⬜", "⬜"]
             ]
         }
 
@@ -307,6 +309,212 @@ class Cube:
         cv.waitKey(0)
         cv.destroyAllWindows()
 
+    # ZA OCITAVANJE SA KAMERE (NIJE ZAVRSENO)
+
+    def color_recognition(patch):
+        # Funkcija koja detektuje boju na osnovu RGB vrednosti
+        # patch - jedan kvadrat na rubikovoj kocki
+
+        b, g, r = np.mean(patch, axis=(0, 1)) # računa prosečne vrednosti boja (R, G, B) preko svih piksela u kvadratu
+        if r > 200 and g < 100 and b < 100:
+            return 'crvena'
+        elif r > 200 and g > 200 and b < 100:
+            return 'žuta'
+        elif r < 100 and g > 200 and b < 100:
+            return 'zelena'
+        elif r < 100 and g > 100 and b > 200:  #g<200
+            return 'plava'
+        elif r > 200 and g < 100 and b > 200:  #g<200 b<100
+            return 'narandžasta'
+        elif r > 200 and g > 200 and b > 200:
+            return 'bela'
+        else:
+            return 'nepoznata'
+
+    def face_detection(frame):
+        # funkcija koja detektuje boje na jednoj stranici kocke
+
+        # Postavljamo kvadrate za detekciju boje
+        # velicina kvadrata u pikselima
+        velicina = 50
+        # pocetne koordinate kvadrata na slici
+        pozicije = [(150 + j * velicina, 150 + i * velicina) for i in range(3) for j in range(3)]
+
+        # lista koja sadrži boje svih kvadrata jedne strane kocke
+        stranica = []
+        # za svih 9 kvadrata na stranici pravi se patch, prepoznaje se boja i dodaje u niz
+        for (x, y) in pozicije:
+            patch = frame[y:y + velicina, x:x + velicina]
+            boja = frame.color_recognition
+            # dodaje prepoznatu boju kvadrata na listu za jednu stranicu
+            stranica.append(boja)
+            # crta kvadrat na slici gde se detektuje boja
+            cv.rectangle(frame, (x, y), (x + velicina, y + velicina), (255, 255, 255), 2)
+
+        return stranica
+
+    def record_face(self):
+        # Funkcija za očitavanje svih stranica Rubikove kocke pomoću kamere
+
+        # otvaranje video strima sa uredjaja
+        cap = cv.VideoCapture(0)
+        # cap je objekat koji omogućava čitanje frejmova (slika) sa kamere pomoću metode cap.read()
+        stranice = []
+
+        while len(stranice) < 6:
+            # ret je boolean vrednost koja označava da li je frejm uspešno pročitan (True) ili nije (False)
+            # frame je trenutni frejm (slika) sa kamere
+            ret, frame = cap.read()
+            if not ret:
+                print("Greška u čitanju kamere!")
+                break
+
+        frame = cv.flip(frame, 1)
+        stranica = self.face_detection
+        cv.putText(frame, f"Stranica {len(stranice) + 1}: {stranica}", (10, 30), cv.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
+        cv.imshow("Rubikova kocka", frame)
+
+        key = cv.waitKey(1)
+        if key == ord('s'):  # 's' za snimanje stranice
+            stranice.append(stranica)
+            print(f"Stranica {len(stranice)} snimljena: {stranica}")
+        elif key == ord('q'): # 'q' za izlazak
+            "break"
+
+        # kada se završi sa korišćenjem kamere, obavezno je osloboditi resurse
+        cap.release()
+        cv.destroyAllWindows()
+        return stranice
+
+    # SOLVER
+
+    def cube_string(self):
+
+        dictionary = {
+            "⬜": "B",
+            "🟨": "F",
+            "🟩": "D",
+            "🟦": "U",
+            "🟥": "R",
+            "🟧": "L"
+        }
+
+        string = ''
+        for i in range(3):
+            for j in range(3):
+                string += dictionary[self.face["Top"][i][j]]
+        for k in range(3):
+            for l in range(3):
+                string += dictionary[self.face["Right"][k][l]]
+        for a in range(3):
+            for b in range(3):
+                string += dictionary[self.face["Front"][a][b]]
+        for m in range(3):
+            for n in range(3):
+                string += dictionary[self.face["Bottom"][m][n]]
+        for c in range(3):
+            for d in range(3):
+                string += dictionary[self.face["Left"][c][d]]
+        for e in range(3):
+            for f in range(3):
+                string += dictionary[self.face["Back"][e][f]]
+
+        print(string)
+        return string
+
+    def solver(self, string):
+
+        cubestring = string
+        solution1 = sv.solve(cubestring, 19, 2)
+        print(solution1) #provera
+
+        p1 = solution1.replace(" ", "")
+        print(p1) #provera
+        length = len(p1)
+        print(length) #provera
+        p2 = p1[0:length-5]
+        print(p2) #provera
+
+        p21 = p2.replace("F", "")
+        p211 = p21.replace("B", "")
+        p212 = p211.replace("L", "")
+        p213 = p212.replace("R", "")
+        p214 = p213.replace("D", "")
+        p215 = p214.replace("U", "")
+        numbers = p215
+        print(numbers) #provera
+        p22 = p2.replace("1", "")
+        p221 = p22.replace("2", "")
+        p222 = p221.replace("3", "")
+        letters = p222
+        print(letters) #provera
+
+        len_letters = len(letters)
+        for i in range (len_letters):
+            if letters[i] == 'U':
+                if numbers[i] == '1':
+                    kocka.rotate_top_clockwise()
+                elif numbers[i] == '2':
+                    kocka.rotate_top_clockwise()
+                    kocka.rotate_top_clockwise()
+                elif numbers[i] == '3':
+                    kocka.rotate_top_clockwise()
+                    kocka.rotate_top_clockwise()
+                    kocka.rotate_top_clockwise()
+            elif letters[i] == 'D':
+                if numbers[i] == '1':
+                    kocka.rotate_bottom_clockwise()
+                elif numbers[i] == '2':
+                    kocka.rotate_bottom_clockwise()
+                    kocka.rotate_bottom_clockwise()
+                elif numbers[i] == '3':
+                    kocka.rotate_bottom_clockwise()
+                    kocka.rotate_bottom_clockwise()
+                    kocka.rotate_bottom_clockwise()
+            elif letters[i] == 'L':
+                if numbers[i] == '1':
+                    kocka.rotate_left_clockwise()
+                elif numbers[i] == '2':
+                    kocka.rotate_left_clockwise()
+                    kocka.rotate_left_clockwise()
+                elif numbers[i] == '3':
+                    kocka.rotate_left_clockwise()
+                    kocka.rotate_left_clockwise()
+                    kocka.rotate_left_clockwise()
+            elif letters[i] == 'R':
+                if numbers[i] == '1':
+                    kocka.rotate_right_clockwise()
+                elif numbers[i] == '2':
+                    kocka.rotate_right_clockwise()
+                    kocka.rotate_right_clockwise()
+                elif numbers[i] == '3':
+                    kocka.rotate_right_clockwise()
+                    kocka.rotate_right_clockwise()
+                    kocka.rotate_right_clockwise()
+            elif letters[i] == 'F':
+                if numbers[i] == '1':
+                    kocka.rotate_front_clockwise()
+                elif numbers[i] == '2':
+                    kocka.rotate_front_clockwise()
+                    kocka.rotate_front_clockwise()
+                elif numbers[i] == '3':
+                    kocka.rotate_front_clockwise()
+                    kocka.rotate_front_clockwise()
+                    kocka.rotate_front_clockwise()
+            elif letters[i] == 'B':
+                if numbers[i] == '1':
+                    kocka.rotate_back_clockwise()
+                elif numbers[i] == '2':
+                    kocka.rotate_back_clockwise()
+                    kocka.rotate_back_clockwise()
+                elif numbers[i] == '3':
+                    kocka.rotate_back_clockwise()
+                    kocka.rotate_back_clockwise()
+                    kocka.rotate_back_clockwise()
+
+        kocka.draw_cube()
+
     def print_cube(self, face):
         content = f"---|{face}|---\n"
         for row in self.face[face]:
@@ -317,7 +525,7 @@ class Cube:
 
 kocka = Cube()
 
-kocka.scramble(25)
+kocka.scramble(35)
 
 #kocka.rotate_top_clockwise()       #slike 1-1 i 1-2
 #kocka.rotate_bottom_clockwise()    #slike 2-1 i 2-2
@@ -334,6 +542,8 @@ kocka.scramble(25)
 #kocka.rotate_back_counter_clockwise()
 
 kocka.draw_cube()
+s = kocka.cube_string()
+kocka.solver(s)
 
 #print(kocka.print_cube("Top"))
 #print(kocka.print_cube("Front"))
