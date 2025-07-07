@@ -6,6 +6,8 @@ import twophase.solver as sv
 
 class Cube:
     def __init__(self):
+
+        #self.solver_type
         self.face = {
             "Top": [
                 ["🟦", "🟦", "🟦"],
@@ -182,29 +184,29 @@ class Cube:
         for i in range(n):
             selected_function = random.choice(functions)
             if selected_function == functions[0]:
-                kocka.rotate_top_clockwise()
+                self.rotate_top_clockwise()
             elif selected_function == functions[1]:
-                kocka.rotate_bottom_clockwise()
+                self.rotate_bottom_clockwise()
             elif selected_function == functions[2]:
-                kocka.rotate_left_clockwise()
+                self.rotate_left_clockwise()
             elif selected_function == functions[3]:
-                kocka.rotate_right_clockwise()
+                self.rotate_right_clockwise()
             elif selected_function == functions[4]:
-                kocka.rotate_front_clockwise()
+                self.rotate_front_clockwise()
             elif selected_function == functions[5]:
-                kocka.rotate_back_clockwise()
+                self.rotate_back_clockwise()
             elif selected_function == functions[6]:
-                kocka.rotate_top_counter_clockwise()
+                self.rotate_top_counter_clockwise()
             elif selected_function == functions[7]:
-                kocka.rotate_bottom_counter_clockwise()
+                self.rotate_bottom_counter_clockwise()
             elif selected_function == functions[8]:
-                kocka.rotate_left_counter_clockwise()
+                self.rotate_left_counter_clockwise()
             elif selected_function == functions[9]:
-                kocka.rotate_right_counter_clockwise()
+                self.rotate_right_counter_clockwise()
             elif selected_function == functions[10]:
-                kocka.rotate_front_counter_clockwise()
+                self.rotate_front_counter_clockwise()
             elif selected_function == functions[11]:
-                kocka.rotate_back_counter_clockwise()
+                self.rotate_back_counter_clockwise()
 
     def draw_cube(self):
 
@@ -309,7 +311,7 @@ class Cube:
         cv.waitKey(0)
         cv.destroyAllWindows()
 
-    # ZA OCITAVANJE SA KAMERE (NIJE ZAVRSENO)
+    # ZA OCITAVANJE SA KAMERE (NE KORISTIM)
 
     def color_recognition(patch):
         # Funkcija koja detektuje boju na osnovu RGB vrednosti
@@ -369,6 +371,7 @@ class Cube:
                 print("Greška u čitanju kamere!")
                 break
 
+        # omogućava okretanje (flipovanje) slike po određenim osama
         frame = cv.flip(frame, 1)
         stranica = self.face_detection
         cv.putText(frame, f"Stranica {len(stranice) + 1}: {stranica}", (10, 30), cv.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
@@ -386,6 +389,17 @@ class Cube:
         cap.release()
         cv.destroyAllWindows()
         return stranice
+
+    if __name__ == "__main__":
+        stranice = record_face()
+        if len(stranice) == 6:
+            print("Sve stranice su očitane:")
+            for i, stranica in enumerate(stranice):
+                print(f"Stranica {i + 1}: {stranica}")
+        else:
+            print("Nisu sve stranice očitane.")
+
+
 
     # SOLVER
 
@@ -425,6 +439,8 @@ class Cube:
 
     def solver(self, string):
 
+        #if(self.solver_type == 'kociemba')
+
         cubestring = string
         solution1 = sv.solve(cubestring, 19, 2)
         print(solution1) #provera
@@ -454,66 +470,66 @@ class Cube:
         for i in range (len_letters):
             if letters[i] == 'U':
                 if numbers[i] == '1':
-                    kocka.rotate_top_clockwise()
+                    self.rotate_top_clockwise()
                 elif numbers[i] == '2':
-                    kocka.rotate_top_clockwise()
-                    kocka.rotate_top_clockwise()
+                    self.rotate_top_clockwise()
+                    self.rotate_top_clockwise()
                 elif numbers[i] == '3':
-                    kocka.rotate_top_clockwise()
-                    kocka.rotate_top_clockwise()
-                    kocka.rotate_top_clockwise()
+                    self.rotate_top_clockwise()
+                    self.rotate_top_clockwise()
+                    self.rotate_top_clockwise()
             elif letters[i] == 'D':
                 if numbers[i] == '1':
-                    kocka.rotate_bottom_clockwise()
+                    self.rotate_bottom_clockwise()
                 elif numbers[i] == '2':
-                    kocka.rotate_bottom_clockwise()
-                    kocka.rotate_bottom_clockwise()
+                    self.rotate_bottom_clockwise()
+                    self.rotate_bottom_clockwise()
                 elif numbers[i] == '3':
-                    kocka.rotate_bottom_clockwise()
-                    kocka.rotate_bottom_clockwise()
-                    kocka.rotate_bottom_clockwise()
+                    self.rotate_bottom_clockwise()
+                    self.rotate_bottom_clockwise()
+                    self.rotate_bottom_clockwise()
             elif letters[i] == 'L':
                 if numbers[i] == '1':
-                    kocka.rotate_left_clockwise()
+                    self.rotate_left_clockwise()
                 elif numbers[i] == '2':
-                    kocka.rotate_left_clockwise()
-                    kocka.rotate_left_clockwise()
+                    self.rotate_left_clockwise()
+                    self.rotate_left_clockwise()
                 elif numbers[i] == '3':
-                    kocka.rotate_left_clockwise()
-                    kocka.rotate_left_clockwise()
-                    kocka.rotate_left_clockwise()
+                    self.rotate_left_clockwise()
+                    self.rotate_left_clockwise()
+                    self.rotate_left_clockwise()
             elif letters[i] == 'R':
                 if numbers[i] == '1':
-                    kocka.rotate_right_clockwise()
+                    self.rotate_right_clockwise()
                 elif numbers[i] == '2':
-                    kocka.rotate_right_clockwise()
-                    kocka.rotate_right_clockwise()
+                    self.rotate_right_clockwise()
+                    self.rotate_right_clockwise()
                 elif numbers[i] == '3':
-                    kocka.rotate_right_clockwise()
-                    kocka.rotate_right_clockwise()
-                    kocka.rotate_right_clockwise()
+                    self.rotate_right_clockwise()
+                    self.rotate_right_clockwise()
+                    self.rotate_right_clockwise()
             elif letters[i] == 'F':
                 if numbers[i] == '1':
-                    kocka.rotate_front_clockwise()
+                    self.rotate_front_clockwise()
                 elif numbers[i] == '2':
-                    kocka.rotate_front_clockwise()
-                    kocka.rotate_front_clockwise()
+                    self.rotate_front_clockwise()
+                    self.rotate_front_clockwise()
                 elif numbers[i] == '3':
-                    kocka.rotate_front_clockwise()
-                    kocka.rotate_front_clockwise()
-                    kocka.rotate_front_clockwise()
+                    self.rotate_front_clockwise()
+                    self.rotate_front_clockwise()
+                    self.rotate_front_clockwise()
             elif letters[i] == 'B':
                 if numbers[i] == '1':
-                    kocka.rotate_back_clockwise()
+                    self.rotate_back_clockwise()
                 elif numbers[i] == '2':
-                    kocka.rotate_back_clockwise()
-                    kocka.rotate_back_clockwise()
+                    self.rotate_back_clockwise()
+                    self.rotate_back_clockwise()
                 elif numbers[i] == '3':
-                    kocka.rotate_back_clockwise()
-                    kocka.rotate_back_clockwise()
-                    kocka.rotate_back_clockwise()
+                    self.rotate_back_clockwise()
+                    self.rotate_back_clockwise()
+                    self.rotate_back_clockwise()
 
-        kocka.draw_cube()
+        self.draw_cube()
 
     def print_cube(self, face):
         content = f"---|{face}|---\n"
@@ -523,27 +539,14 @@ class Cube:
 
 
 
-kocka = Cube()
+#kocka = Cube()
 
-kocka.scramble(35)
+#kocka.scramble(35)
 
-#kocka.rotate_top_clockwise()       #slike 1-1 i 1-2
-#kocka.rotate_bottom_clockwise()    #slike 2-1 i 2-2
-#kocka.rotate_left_clockwise()      #slike 3-1 i 3-2
-#kocka.rotate_right_clockwise()     #slike 4-1 i 4-2
-#kocka.rotate_front_clockwise()     #slike 5-1 i 5-2
-#kocka.rotate_back_clockwise()      #slike 6-1 i 6-2
+#kocka.draw_cube()
+#s = kocka.cube_string()
+#kocka.solver(s)
 
-#kocka.rotate_top_counter_clockwise()
-#kocka.rotate_bottom_counter_clockwise()
-#kocka.rotate_left_counter_clockwise()
-#kocka.rotate_right_counter_clockwise()
-#kocka.rotate_front_counter_clockwise()
-#kocka.rotate_back_counter_clockwise()
-
-kocka.draw_cube()
-s = kocka.cube_string()
-kocka.solver(s)
 
 #print(kocka.print_cube("Top"))
 #print(kocka.print_cube("Front"))
