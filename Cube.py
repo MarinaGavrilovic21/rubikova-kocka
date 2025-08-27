@@ -208,6 +208,8 @@ class Cube:
             elif selected_function == functions[11]:
                 self.rotate_back_counter_clockwise()
 
+            print(selected_function)
+
     def draw_cube(self):
 
         dictionary = {
@@ -222,7 +224,7 @@ class Cube:
         # Create a black image
         img = np.zeros((1200, 1200, 3), np.uint8)
 
-        # Drawing rectangle
+        # Drawing rectangle PRVA I TRECA KOLONA SU ZAMENJENI INDEKSI ZA SVE BOJE
         # Top
         # Prva kolona
         cv.rectangle(img, (242, 5), (316, 79), dictionary[self.face["Top"][0][0]], -1)
@@ -310,96 +312,6 @@ class Cube:
         cv.imshow("Cube", img)
         cv.waitKey(0)
         cv.destroyAllWindows()
-
-    # ZA OCITAVANJE SA KAMERE (NE KORISTIM)
-
-    def color_recognition(patch):
-        # Funkcija koja detektuje boju na osnovu RGB vrednosti
-        # patch - jedan kvadrat na rubikovoj kocki
-
-        b, g, r = np.mean(patch, axis=(0, 1)) # računa prosečne vrednosti boja (R, G, B) preko svih piksela u kvadratu
-        if r > 200 and g < 100 and b < 100:
-            return 'crvena'
-        elif r > 200 and g > 200 and b < 100:
-            return 'žuta'
-        elif r < 100 and g > 200 and b < 100:
-            return 'zelena'
-        elif r < 100 and g > 100 and b > 200:  #g<200
-            return 'plava'
-        elif r > 200 and g < 100 and b > 200:  #g<200 b<100
-            return 'narandžasta'
-        elif r > 200 and g > 200 and b > 200:
-            return 'bela'
-        else:
-            return 'nepoznata'
-
-    def face_detection(frame):
-        # funkcija koja detektuje boje na jednoj stranici kocke
-
-        # Postavljamo kvadrate za detekciju boje
-        # velicina kvadrata u pikselima
-        velicina = 50
-        # pocetne koordinate kvadrata na slici
-        pozicije = [(150 + j * velicina, 150 + i * velicina) for i in range(3) for j in range(3)]
-
-        # lista koja sadrži boje svih kvadrata jedne strane kocke
-        stranica = []
-        # za svih 9 kvadrata na stranici pravi se patch, prepoznaje se boja i dodaje u niz
-        for (x, y) in pozicije:
-            patch = frame[y:y + velicina, x:x + velicina]
-            boja = frame.color_recognition
-            # dodaje prepoznatu boju kvadrata na listu za jednu stranicu
-            stranica.append(boja)
-            # crta kvadrat na slici gde se detektuje boja
-            cv.rectangle(frame, (x, y), (x + velicina, y + velicina), (255, 255, 255), 2)
-
-        return stranica
-
-    def record_face(self):
-        # Funkcija za očitavanje svih stranica Rubikove kocke pomoću kamere
-
-        # otvaranje video strima sa uredjaja
-        cap = cv.VideoCapture(0)
-        # cap je objekat koji omogućava čitanje frejmova (slika) sa kamere pomoću metode cap.read()
-        stranice = []
-
-        while len(stranice) < 6:
-            # ret je boolean vrednost koja označava da li je frejm uspešno pročitan (True) ili nije (False)
-            # frame je trenutni frejm (slika) sa kamere
-            ret, frame = cap.read()
-            if not ret:
-                print("Greška u čitanju kamere!")
-                break
-
-        # omogućava okretanje (flipovanje) slike po određenim osama
-        frame = cv.flip(frame, 1)
-        stranica = self.face_detection
-        cv.putText(frame, f"Stranica {len(stranice) + 1}: {stranica}", (10, 30), cv.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-
-        cv.imshow("Rubikova kocka", frame)
-
-        key = cv.waitKey(1)
-        if key == ord('s'):  # 's' za snimanje stranice
-            stranice.append(stranica)
-            print(f"Stranica {len(stranice)} snimljena: {stranica}")
-        elif key == ord('q'): # 'q' za izlazak
-            "break"
-
-        # kada se završi sa korišćenjem kamere, obavezno je osloboditi resurse
-        cap.release()
-        cv.destroyAllWindows()
-        return stranice
-
-    if __name__ == "__main__":
-        stranice = record_face()
-        if len(stranice) == 6:
-            print("Sve stranice su očitane:")
-            for i, stranica in enumerate(stranice):
-                print(f"Stranica {i + 1}: {stranica}")
-        else:
-            print("Nisu sve stranice očitane.")
-
-
 
     # SOLVER
 
@@ -541,18 +453,11 @@ class Cube:
 
 #kocka = Cube()
 
-#kocka.scramble(35)
+#kocka.scramble(20)
 
 #kocka.draw_cube()
+
 #s = kocka.cube_string()
 #kocka.solver(s)
-
-
-#print(kocka.print_cube("Top"))
-#print(kocka.print_cube("Front"))
-#print(kocka.print_cube("Left"))
-#print(kocka.print_cube("Right"))
-#print(kocka.print_cube("Back"))
-#print(kocka.print_cube("Bottom"))
 
 
